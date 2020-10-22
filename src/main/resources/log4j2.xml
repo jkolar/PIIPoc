@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="filename">target/test.log</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/-->
+            <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %pii%n"/>
+        </Console>
+        <File name="File1" fileName="${filename}">
+        <!--PatternLayout>
+            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
+        </PatternLayout-->
+        <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %pii%n"/>
+
+        </File>
+    </Appenders>
+    <Loggers>
+
+        <Root level="all">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+        <Logger name="ca.interac.pii.demo.Main" level="debug" additivity="false">
+            <AppenderRef ref="Console">
+            </AppenderRef>
+        </Logger>
+
+    </Loggers>
+</Configuration>
