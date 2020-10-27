@@ -1,10 +1,13 @@
 package ca.interac.pii.mask;
 
+import ca.interac.pii.demo.Main;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.pattern.ConverterKeys;
 import org.apache.logging.log4j.core.pattern.LogEventPatternConverter;
 
+import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,18 +15,11 @@ import java.util.regex.Pattern;
 @ConverterKeys("pii")
 public class LogMaskingConverter extends LogEventPatternConverter {
 
-    private static final String CREDIT_CARD_REGEX = "([0-9]{16})";
-    private static final Pattern CREDIT_CARD_PATTERN = Pattern.compile(CREDIT_CARD_REGEX);
-    private static final String CAREDIT_CARD_REPLACEMENT_REGEX = "XXXXXXXXXXXXXXXX";
-
-    private static final String SIN_REGEX = "([0-9]{9})";
-    private static final Pattern SIN_PATTERN = Pattern.compile(SIN_REGEX);
-    private static final String SIN_REPLACEMENT_REGEX = "*********";
-
     protected LogMaskingConverter(String name, String style) {
         super(name, style);
     }
     public static LogMaskingConverter newInstance(String[] options) {
+
         return new LogMaskingConverter("pii",Thread.currentThread().getName());
     }
 
@@ -36,16 +32,23 @@ public class LogMaskingConverter extends LogEventPatternConverter {
     }
 
     private String mask(String message) {
+
         Matcher matcher =null;
+        Pattern patern = null;
         StringBuffer buffer = new StringBuffer();
 
-        matcher = CREDIT_CARD_PATTERN.matcher(message);
-        maskMatcher(matcher, buffer,CAREDIT_CARD_REPLACEMENT_REGEX);
-        message=buffer.toString();
-        buffer.setLength(0);
-
-        matcher = SIN_PATTERN.matcher(message);
-        maskMatcher(matcher, buffer,SIN_REPLACEMENT_REGEX);
+        // TODO: map of regular expressions is Main class static field. This has to change to some marker class to be part of a package coming with this util
+        Set<String> set = Main.regExpressions.keySet();
+        Iterator<String> it = set.iterator();
+        while (it.hasNext()) {
+            String regEx = it.next();
+            patern = Pattern.compile(regEx);
+            matcher = patern.matcher(message);
+            String mask = Main.regExpressions.get(regEx);
+            buffer.setLength(0);
+            maskMatcher(matcher, buffer,mask);
+            message=buffer.toString();
+        }
 
         return buffer.toString();
     }

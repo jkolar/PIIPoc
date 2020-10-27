@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
     <Properties>
-        <Property name="filename">target/test.log</Property>
+        <Property name="filename">target/transaction.log</Property>
+        <Property name="filename2">target/payload.log</Property>
+
+        <Property name="CREDIT_CARD_REGEX">([0-9]{16})</Property>
+        <Property name="CREDIT_CARD_MASK">XXXXXXXXXXXXXXXX</Property>
+
+        <Property name="SIN_REGEX">([5]{3}-[0-9]{3}-[0-9]{3})</Property>
+        <Property name="SIN_MASK">***-***-***</Property>
+
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <!--PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/-->
             <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %pii%n"/>
         </Console>
-        <File name="File1" fileName="${filename}">
-        <!--PatternLayout>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-        </PatternLayout-->
-        <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %pii%n"/>
 
+        <File name="File1" fileName="${filename}">
+            <MarkerFilter marker="MASKED" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--NoMarkerFilter onMatch="DENY" onMismatch="ACCEPT"/-->
+            <!-- OFF/ON switch, pp<-> msg -->
+            <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %pii%n"/>
         </File>
+
+        <File name="File2" fileName="${filename2}">
+            <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+
+
+        <File name="File3" fileName="${filename}">
+            <NoMarkerFilter onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyyMMdd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+
     </Appenders>
     <Loggers>
 
@@ -22,9 +41,13 @@
             <AppenderRef ref="Console"/>
         </Root>
 
-        <Logger name="ca.interac.pii.demo.Main" level="debug" additivity="false">
-            <AppenderRef ref="Console">
-            </AppenderRef>
+        <Logger name="ApplicationLog" level="debug" additivity="false">
+            <AppenderRef ref="File1"/>
+            <AppenderRef ref="File3"/>
+        </Logger>
+
+        <Logger name="PayloadLog" level="debug" additivity="false">
+            <AppenderRef ref="File2"/>
         </Logger>
 
     </Loggers>
